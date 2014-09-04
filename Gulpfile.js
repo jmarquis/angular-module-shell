@@ -4,7 +4,7 @@ var pkg = require("./package.json"),
 	concat = require("gulp-concat"),
 	header = require("gulp-header"),
 	moment = require("moment"),
-	sass = require("gulp-sass"),
+	less = require("gulp-less"),
 	minifyCss = require("gulp-minify-css"),
 	ngAnnotate = require("gulp-ng-annotate");
 	uglify = require("gulp-uglify"),
@@ -21,7 +21,10 @@ gulp.task("clean-build", function () {
 
 gulp.task("clean-build-scripts", function () {
 
-	return gulp.src("./build/scripts/", { read: false })
+	return gulp.src([
+		"./build/scripts/",
+		"./temp/"
+	], { read: false })
 		.pipe(rimraf());
 
 });
@@ -56,7 +59,7 @@ gulp.task("clean-dist", function () {
 
 gulp.task("clean", ["clean-build", "clean-dist"]);
 
-gulp.task("build-libs", function () {
+gulp.task("build-libs", ["clean-build-scripts"], function () {
 
 	return gulp.src([
 		"./bower_components/angular/angular.js"
@@ -66,7 +69,7 @@ gulp.task("build-libs", function () {
 
 });
 
-gulp.task("build-app-scripts", function () {
+gulp.task("build-app-scripts", ["clean-build-scripts"], function () {
 
 	return gulp.src([
 		"./src/scripts/**/*.js"
@@ -93,17 +96,12 @@ gulp.task("build-scripts", ["clean-build-scripts", "build-libs", "build-app-scri
 		].join("\n"), {pkg: pkg}))
 		.pipe(gulp.dest("./build/scripts/"));
 
-	return gulp.src(["./temp/"])
-		.pipe(rimraf());
-
 });
 
 gulp.task("build-styles", ["clean-build-styles"], function () {
 
-	return gulp.src("./src/styles/app.scss")
-		.pipe(sass({
-			outputStyle: "nested"
-		}))
+	return gulp.src("./src/styles/app.less")
+		.pipe(less())
 		.pipe(header([
 			"/**",
 			" * ${pkg.name} v${pkg.version}",
@@ -194,10 +192,12 @@ gulp.task("watch", ["build"], function () {
 
 	livereload.listen();
 	gulp.watch("./src/scripts/**/*.js", ["build-scripts"]);
-	gulp.watch("./src/styles/**/*.scss", ["build-styles"]);
+	gulp.watch("./src/styles/**/*.less", ["build-styles"]);
 	gulp.watch("./src/**/*.html", ["copy-index-build", "copy-views-build"]);
 	gulp.on("stop", function () {
-		livereload.changed();
+		setTimeout(function () {
+			livereload.changed();
+		}, 10);
 	});
 
 });
