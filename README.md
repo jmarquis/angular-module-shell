@@ -6,8 +6,6 @@ Don't get me wrong, this one is opinionated too.
 
 But it's my opinion.
 
-— @jmarquis
-
 
 ### What this is
 
