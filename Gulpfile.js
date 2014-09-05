@@ -65,7 +65,8 @@ gulp.task("clean-dist", function () {
 gulp.task("lib-scripts", ["clean-scripts"], function () {
 
 	return gulp.src([
-		"./bower_components/angular/angular.js"
+		"./bower_components/angular/angular.js",
+		"./bower_components/html5shiv/dist/html5shiv.js"
 	])
 		.pipe(concat("libs.js"))
 		.pipe(gulp.dest("./temp-scripts/"));
