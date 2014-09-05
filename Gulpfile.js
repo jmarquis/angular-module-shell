@@ -9,7 +9,11 @@ var pkg = require("./package.json"),
 	ngAnnotate = require("gulp-ng-annotate");
 	uglify = require("gulp-uglify"),
 	express = require("express"),
-	livereload = require("gulp-livereload");
+	livereload = require("gulp-livereload"),
+	karma = require("karma").server;
+
+
+var tdd = false;
 
 
 gulp.task("clean", function () {
@@ -60,7 +64,9 @@ gulp.task("clean-dist", function () {
 
 	return gulp.src("./dist/").pipe(rimraf());
 
-})
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task("lib-scripts", ["clean-scripts"], function () {
 
@@ -137,6 +143,20 @@ gulp.task("views", ["clean-views"], function () {
 
 gulp.task("build", ["scripts", "styles", "views", "index"]);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+gulp.task("test", function (done) {
+
+	karma.start({
+		configFile: __dirname + "/test/unit/karma.conf.js",
+		singleRun: true,
+		autoWatch: false
+	}, done);
+
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 gulp.task("package-scripts", ["clean-dist"], function () {
 
 	return gulp.src("./build/scripts/app.js")
@@ -170,6 +190,8 @@ gulp.task("package-views", ["clean-dist"], function () {
 
 gulp.task("package", ["package-scripts", "package-styles", "package-index", "package-views"]);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 gulp.task("run", function () {
 
 	var app = express();
@@ -188,9 +210,22 @@ gulp.task("watch", ["build"], function () {
 	gulp.on("stop", function () {
 		setTimeout(function () {
 			livereload.changed();
-		}, 10);
+			if (tdd) karma.start({
+				configFile: __dirname + "/test/unit/karma.conf.js",
+				singleRun: true,
+				autoWatch: false
+			}, function () {});
+		}, 100);
 	});
 
 });
+
+gulp.task("tdd", function () {
+
+	tdd = true;
+
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task("default", ["build"]);
