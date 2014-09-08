@@ -10,10 +10,12 @@ var pkg = require("./package.json"),
 	uglify = require("gulp-uglify"),
 	express = require("express"),
 	livereload = require("gulp-livereload"),
-	karma = require("karma").server;
+	karma = require("karma").server,
+	protractor = require("gulp-protractor").protractor;
 
 
-var tdd = false;
+var tdd = false,
+	e2etdd = false;
 
 
 gulp.task("clean", function () {
@@ -155,6 +157,18 @@ gulp.task("test", function (done) {
 
 });
 
+gulp.task("e2e", function () {
+
+	return gulp.src(["./test/e2e/**/*.js"], { read: false })
+		.pipe(protractor({
+			configFile: "./test/e2e/protractor.conf.js"
+		}))
+		.on("error", function (e) {
+			console.log(e);
+		});
+
+});
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task("package-scripts", ["clean-dist"], function () {
@@ -209,12 +223,23 @@ gulp.task("watch", ["build"], function () {
 	gulp.watch("./src/**/*.html", ["index", "views"]);
 	gulp.on("stop", function () {
 		setTimeout(function () {
+
 			livereload.changed();
+
 			if (tdd) karma.start({
 				configFile: __dirname + "/test/unit/karma.conf.js",
 				singleRun: true,
 				autoWatch: false
 			}, function () {});
+
+			if (e2etdd) gulp.src(["./test/e2e/**/*.js"], { read: false })
+				.pipe(protractor({
+					configFile: "./test/e2e/protractor.conf.js"
+				}))
+				.on("error", function (e) {
+					console.log(e);
+				});
+
 		}, 100);
 	});
 
@@ -223,6 +248,12 @@ gulp.task("watch", ["build"], function () {
 gulp.task("tdd", function () {
 
 	tdd = true;
+
+});
+
+gulp.task("e2e:tdd", function () {
+
+	e2etdd = true;
 
 });
 
