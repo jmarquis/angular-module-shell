@@ -11,7 +11,9 @@ var pkg = require("./package.json"),
 	express = require("express"),
 	livereload = require("gulp-livereload"),
 	karma = require("karma").server,
-	protractor = require("gulp-protractor").protractor;
+	protractor = require("gulp-protractor").protractor,
+	scripts = require("./scripts.json"),
+	styles = require("./styles.json");
 
 
 var tdd = false,
@@ -72,10 +74,7 @@ gulp.task("clean-dist", function () {
 
 gulp.task("lib-scripts", ["clean-scripts"], function () {
 
-	return gulp.src([
-		"./bower_components/angular/angular.js",
-		"./bower_components/html5shiv/dist/html5shiv.js"
-	])
+	return gulp.src(scripts.libs)
 		.pipe(concat("libs.js"))
 		.pipe(gulp.dest("./temp-scripts/"));
 
@@ -83,9 +82,7 @@ gulp.task("lib-scripts", ["clean-scripts"], function () {
 
 gulp.task("app-scripts", ["clean-scripts"], function () {
 
-	return gulp.src([
-		"./src/scripts/**/*.js"
-	])
+	return gulp.src(scripts.app)
 		.pipe(ngAnnotate())
 		.pipe(concat("app.js"))
 		.pipe(gulp.dest("./temp-scripts/"));
@@ -112,10 +109,7 @@ gulp.task("scripts", ["clean-scripts", "lib-scripts", "app-scripts"], function (
 
 gulp.task("styles", ["clean-styles"], function () {
 
-	return gulp.src([
-		"./bower_components/normalize-css/normalize.css",
-		"./src/styles/app.less"
-	])
+	return gulp.src(styles)
 		.pipe(concat("app.less"))
 		.pipe(less())
 		.pipe(header([
@@ -218,8 +212,8 @@ gulp.task("run", function () {
 gulp.task("watch", ["build"], function () {
 
 	livereload.listen();
-	gulp.watch("./src/scripts/**/*.js", ["scripts"]);
-	gulp.watch("./src/styles/**/*.less", ["styles"]);
+	gulp.watch(scripts.app, ["scripts"]);
+	gulp.watch(styles, ["styles"]);
 	gulp.watch("./src/**/*.html", ["index", "views"]);
 	gulp.on("stop", function () {
 		setTimeout(function () {

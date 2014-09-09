@@ -1,0 +1,4 @@
+[
+	"./bower_components/normalize-css/normalize.css",
+	"./src/styles/app.less"
+]
